@@ -144,9 +144,17 @@ def add_song_to_playlist(playlist_id):
     # Restrict form to songs not already on this playlist
 
     curr_on_playlist = [s.id for s in playlist.songs]
-    form.song.choices = (db.session.query(Song.id, Song.title)
-                         .filter(Song.id.notin_(curr_on_playlist))
-                         .all())
+    choices = (db.session.query(Song.id, Song.title)
+                .filter(Song.id.notin_(curr_on_playlist))
+                .all())
+
+    for choice in choices:    
+        # Convert Song.id from int to     
+        form.song.choices.append((str(choice[0]), choice[1]))
+    
+    # form.song.choices = (db.session.query(Song.id, Song.title)
+    #                      .filter(Song.id.notin_(curr_on_playlist))
+    #                      .all())
     
     if form.validate_on_submit():
 
@@ -155,7 +163,10 @@ def add_song_to_playlist(playlist_id):
         playlist_song = PlaylistSong(song_id=form.song.data,
                                      playlist_id=playlist_id)
         db.session.add(playlist_song)
-
+        print(form.song.data,'--------------------------',type(form.song.data))
+        print(playlist_id,'----------------------------',type(playlist_id))
+        print(playlist_song.playlist_id,'------------------------',playlist_song.song_id)
+        
         # Here's another way you could do, which is slightly more ORM-ish:
         #
         # song = Song.query.get(form.song.data)
